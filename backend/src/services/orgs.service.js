@@ -16,7 +16,7 @@ async function createOrg(actorUserId, name) {
 
     await client.query(`
       INSERT INTO membership (user_id, org_id, role)
-      VALUES ($1,$2, 'admin')`,
+      VALUES ($1,$2, 'owner')`,
     [actorUserId, orgId])
 
     await client.query("COMMIT");

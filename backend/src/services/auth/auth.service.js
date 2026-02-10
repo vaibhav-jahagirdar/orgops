@@ -5,15 +5,12 @@ const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = "15m";
 
-/* ================= REGISTER ================= */
-
 async function register({ email, name, password }) {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
-    // 1. Check existing user
     const userResult = await client.query(
       `SELECT id FROM users WHERE email = $1`,
       [email]
@@ -33,7 +30,6 @@ async function register({ email, name, password }) {
       userId = userResult.rows[0].id;
     }
 
-    // 2. Check existing credentials
     const credsResult = await client.query(
       `SELECT 1 FROM user_credentials WHERE user_id = $1`,
       [userId]
@@ -43,7 +39,6 @@ async function register({ email, name, password }) {
       throw { code: "EMAIL_ALREADY_REGISTERED" };
     }
 
-    // 3. Hash + store password
     const passwordHash = await bcrypt.hash(password, 12);
 
     await client.query(
