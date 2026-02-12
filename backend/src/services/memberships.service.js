@@ -13,7 +13,7 @@ async function addMember({ actorUserId, userId, orgId, role }) {
       throw { code: "ORG_NOT_FOUND" };
     }
 
-    t;
+ 
     const userResult = await client.query("SELECT 1 FROM users WHERE id = $1", [
       userId,
     ]);
