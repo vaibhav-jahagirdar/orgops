@@ -32,3 +32,8 @@ function requireMembership(minRole) {
     next();
   };
 }
+
+
+module.exports = {
+  requireMembership
+}
