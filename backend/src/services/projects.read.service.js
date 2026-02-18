@@ -16,6 +16,7 @@ async function listProjects({
     FROM projects
     WHERE org_id = $1
   `;
+  
 
   if (search) {
     values.push(`%${search}%`);
