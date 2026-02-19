@@ -61,7 +61,7 @@ async function listTasks({
 
   const dataQuery = `
     SELECT id, title, status, priority, description,
-           due_date, updated_at, assigned_to
+    due_date, updated_at, assigned_to
     FROM tasks
     ${where}
     ORDER BY ${safeSort} ${safeOrder}
