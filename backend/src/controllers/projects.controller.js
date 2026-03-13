@@ -8,44 +8,36 @@ const {
   deleteProject,
 } = require("../services/projects.service");
 
-async function createProjectController(req, res, next) {
-  try {
-    const parsed = createProjectSchema.parse(req.body);
+const asyncHandler = require("../utils/asyncHandler");
 
-    const orgId = Number(req.params.orgId);
-    const userId = req.user.id;
+const createProjectController = asyncHandler(async (req, res) => {
+  const parsed = createProjectSchema.parse(req.body);
 
-    const project = await createProject(
-      parsed.name,
-      orgId,
-      userId
-    );
+  const orgId = Number(req.params.orgId);
+  const userId = req.user.id;
 
-    return res.status(201).json({ project });
+  const project = await createProject(
+    parsed.name,
+    orgId,
+    userId
+  );
 
-  } catch (error) {
-    next(error);
-  }
-}
+  return res.status(201).json({ project });
+});
 
-async function deleteProjectController(req, res, next) {
-  try {
-    const parsedParams = deleteProjectParamsSchema.parse(req.params);
+const deleteProjectController = asyncHandler(async (req, res) => {
+  const parsedParams = deleteProjectParamsSchema.parse(req.params);
 
-    const userId = req.user.id;
+  const userId = req.user.id;
 
-    const result = await deleteProject(
-      userId,
-      parsedParams.orgId,
-      parsedParams.projectId
-    );
+  const result = await deleteProject(
+    userId,
+    parsedParams.orgId,
+    parsedParams.projectId
+  );
 
-    return res.status(200).json(result);
-
-  } catch (error) {
-    next(error);
-  }
-}
+  return res.status(200).json(result);
+});
 
 module.exports = {
   createProjectController,

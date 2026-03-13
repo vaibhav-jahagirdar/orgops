@@ -1,23 +1,19 @@
-const { listProjectsSchema } = require("../schemas/project.list.schema");
-const { listProjects } = require("../services/projects.list.service");
+const { listProjects } = require("../services/projects.read.service");
+const { listProjectsSchema } = require("../schemas/project.schema.list");
 
 async function listProjectsController(req, res, next) {
   try {
     const { orgId } = req.params;
 
-    const parsed = listProjectsSchema.parse(req.query);
+    const queryParams = listProjectsSchema.parse(req.query);
 
-    const projects = await listProjects({
-      orgId: parseInt(orgId, 10),
-      ...parsed,
+    const result = await listProjects({
+      orgId: Number(orgId),
+      ...queryParams,
     });
 
-    return res.status(200).json({
-      page: parsed.page,
-      limit: parsed.limit,
-      count: projects.length,
-      data: projects,
-    });
+    return res.status(200).json(result);
+
   } catch (error) {
     next(error);
   }

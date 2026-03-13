@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const requireAuth = require("../middleware/requireAuth");
-const requireMembership = require("../middleware/requireMembership");
+const {requireMembership} = require("../middleware/requireMembership");
 
 const {
   createProjectController,
@@ -11,7 +11,7 @@ const {
 
 
 router.post(
-  "/orgs/:orgId/projects",
+  "/:orgId/projects",
   requireAuth,
   requireMembership("admin"),
   createProjectController
@@ -19,7 +19,7 @@ router.post(
 
 
 router.delete(
-  "/orgs/:orgId/projects/:projectId",
+  "/:orgId/projects/:projectId",
   requireAuth,
   requireMembership("admin"),
   deleteProjectController

@@ -18,7 +18,7 @@ function requireMembership(minRole) {
     );
 
     if (result.rowCount === 0) {
-      return res.status(401).json({ error: "FORBIDDEN" });
+      return res.status(403).json({ error: "FORBIDDEN" });
     }
     const userRole = result.rows[0].role;
 

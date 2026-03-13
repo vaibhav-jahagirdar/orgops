@@ -1,8 +1,10 @@
 const express = require("express")
 const router = express.Router()
+const requireAuth = require("../middleware/requireAuth")
+const { requireMembership } = require("../middleware/requireMembership")
+const { listMyOrgs, getOrgById } = require("../controllers/orgs.read.controller")
 
-const orgsReadController = require("../controllers/orgs.read.controller")
+router.get("/", requireAuth, listMyOrgs)
+router.get("/:orgId", requireAuth, requireMembership(), getOrgById)
 
-router.get("/",orgsReadController.listOrgsForUser)
-
-module.exports = router;
+module.exports = router

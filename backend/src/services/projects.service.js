@@ -1,4 +1,5 @@
 const pool = require("../db");
+const AppError = require("../utils/AppError");
 
 async function createProject(name, orgId, userId) {
   const client = await pool.connect();
@@ -9,25 +10,31 @@ async function createProject(name, orgId, userId) {
     const result = await client.query(
       `INSERT INTO projects (org_id, name, created_by)
        VALUES ($1, $2, $3)
-       RETURNING id, org_id, name, created_at`,
+       RETURNING id, org_id, name, created_by, created_at`,
       [orgId, name, userId]
     );
+
+    const project = result.rows[0];
 
     await client.query(
       `INSERT INTO audit_logs (actor_user_id, action, entity_type, entity_id)
        VALUES ($1, $2, $3, $4)`,
-      [userId, "PROJECT_CREATED", "project", result.rows[0].id]
+      [userId, "PROJECT_CREATED", "project", project.id]
     );
 
     await client.query("COMMIT");
 
-    return result.rows[0];
+    return project;
 
   } catch (err) {
     await client.query("ROLLBACK");
 
     if (err.code === "23505") {
-      throw { code: "PROJECT_NAME_ALREADY_TAKEN" };
+      throw new AppError(
+        "Project name already exists in this organization",
+        409,
+        "PROJECT_NAME_ALREADY_TAKEN"
+      );
     }
 
     throw err;
@@ -50,7 +57,11 @@ async function deleteProject(userId, orgId, projectId) {
     );
 
     if (deleteResult.rowCount === 0) {
-      throw { code: "PROJECT_DOES_NOT_EXIST" };
+      throw new AppError(
+        "Project does not exist",
+        404,
+        "PROJECT_DOES_NOT_EXIST"
+      );
     }
 
     await client.query(
@@ -63,9 +74,9 @@ async function deleteProject(userId, orgId, projectId) {
 
     return { projectId };
 
-  } catch (error) {
+  } catch (err) {
     await client.query("ROLLBACK");
-    throw error;
+    throw err;
   } finally {
     client.release();
   }

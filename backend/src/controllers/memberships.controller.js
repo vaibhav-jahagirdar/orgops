@@ -5,7 +5,7 @@ async function addMember(req, res) {
     const orgId = Number(req.params.orgId);
     const { userId, role } = req.body;
 
-    const actorUserId = req.cookies?.access_token;
+    const actorUserId = req.cookies?.accessToken;
 
     if (!actorUserId) {
       return res.status(400).json({ error: "actor user id missing" });

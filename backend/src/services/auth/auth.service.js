@@ -64,13 +64,13 @@ async function register({ email, name, password }) {
 
     await client.query("COMMIT");
 
-    const access_token = jwt.sign({ userId }, JWT_SECRET, {
+    const accessToken = jwt.sign({ userId }, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
     });
 
     return {
       user: { id: userId, email, name },
-      access_token,
+      accessToken,
       refreshToken,
     };
 
@@ -118,7 +118,7 @@ async function login({ email, password }) {
       );
     }
 
-    const access_token = jwt.sign({ userId }, JWT_SECRET, {
+    const accessToken = jwt.sign({ userId }, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
     });
 
@@ -143,7 +143,7 @@ async function login({ email, password }) {
 
     return {
       user: { id: userId, email },
-      access_token,
+      accessToken,
       refreshToken,
     };
 

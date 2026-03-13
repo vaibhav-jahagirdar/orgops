@@ -18,21 +18,21 @@ async function createOrg(actorUserId, name) {
       INSERT INTO membership (user_id, org_id, role)
       VALUES ($1,$2, 'owner')`,
     [actorUserId, orgId])
+    
 
     await client.query("COMMIT");
 
     return {
       orgId,
-      name, 
+      name,
+      role:"owner" 
     }
   } catch (error) {
     await client.query("ROLLBACK"); 
     throw error; 
   } finally {
-    client.release
+    client.release()
   }
 }
 
-module.exports = {
-  createOrg,
-}
+module.exports = { createOrg }

@@ -6,16 +6,14 @@ async function createOrg(req, res ) {
     if(!name) {
         return res.status(400).json({error: "name is required"});
     }
-    const org = await orgService.createOrg(name);
+    const org = await orgService.createOrg(req.user.id, name);
 
     res.status(201).json(org);
    } catch (error) {
-    console.error(err);
+    console.error(error);
     res.status(500).json({error: "internal server error"})
     
    }   
 }
 
-module.exports = {
-    createOrg,
-}
+module.exports = { createOrg }

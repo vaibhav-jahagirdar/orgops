@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken")
 const JWT_SECRET = process.env.JWT_SECRET
 
 function requireAuth (req, res , next) {
-    const token = req.cookies?.access_token;
+    const token = req.cookies?.accessToken;
     if(!token) {
         return res.status(401).json({error: "authentication required"})
     }
