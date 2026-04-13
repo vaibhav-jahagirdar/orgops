@@ -9,7 +9,10 @@ async function listTasksController(req, res, next) {
     });
 
     const orgId = parseInt(parsed.params.orgId, 10);
-    const projectId = parseInt(parsed.params.projectId, 10);
+
+    const projectId = parsed.params.projectId
+      ? parseInt(parsed.params.projectId, 10)
+      : undefined;
 
     const page = parsed.query.page ? parseInt(parsed.query.page, 10) : 1;
     const limit = parsed.query.limit ? parseInt(parsed.query.limit, 10) : 10;
@@ -19,6 +22,14 @@ async function listTasksController(req, res, next) {
       projectId,
       userId: req.user.id,
       role: req.membership.role,
+
+      assignedTo: parsed.query.assignedTo
+        ? parseInt(parsed.query.assignedTo, 10)
+        : undefined,
+
+      status: parsed.query.status,
+      overdue: parsed.query.overdue === "true",
+
       sort: parsed.query.sort,
       order: parsed.query.order,
       page,

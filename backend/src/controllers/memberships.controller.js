@@ -1,46 +1,39 @@
 const membershipService = require("../services/memberships.service");
+const { addMemberBodySchema } = require("../schemas/addMember")
+const AppError = require("../utils/AppError");
 
-async function addMember(req, res) {
+async function addMember(req, res, next) {
+  console.log("controller hit", req.user, req.body, req.params);
+  
   try {
-    const orgId = Number(req.params.orgId);
-    const { userId, role } = req.body;
 
-    const actorUserId = req.cookies?.accessToken;
+    const actorUserId = req.user?.id;
+    const orgId = Number(req.params.orgId); 
+    console.log("orgId:", orgId)
 
     if (!actorUserId) {
-      return res.status(400).json({ error: "actor user id missing" });
+      throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
     }
 
-    if (!userId || !role) {
-      return res.status(400).json({ error: "userId and role are required" });
+    if (!orgId || Number.isNaN(orgId)) {
+      throw new AppError("Invalid org id", 400, "INVALID_ORG_ID");
     }
+
+  
+    const parsedBody = addMemberBodySchema.parse(req.body);
 
     const membership = await membershipService.addMember({
       actorUserId,
-      userId,
       orgId,
-      role,
+      userId: parsedBody.userId,
+      email: parsedBody.email,
+      role: parsedBody.role,
     });
 
-    return res.status(201).json(membership);
+    return res.status(201).json({ success: true, data: membership });
   } catch (err) {
-    if (err.message === "ORG_NOT_FOUND") {
-      return res.status(404).json({ error: "org not found" });
-    }
-
-    if (err.message === "USER_NOT_FOUND") {
-      return res.status(404).json({ error: "user not found" });
-    }
-
-    if (err.message === "FORBIDDEN") {
-      return res.status(403).json({ error: "not allowed" });
-    }
-
-    console.error(err);
-    return res.status(500).json({ error: "internal server error" });
+    return next(err); 
   }
 }
 
-module.exports = {
-  addMember,
-};
+module.exports = { addMember };

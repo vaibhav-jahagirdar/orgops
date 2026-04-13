@@ -2,12 +2,14 @@ const express = require("express");
 const router = express.Router();
 
 const requireAuth = require("../middleware/requireAuth");
+const { requireMembership } = require("../middleware/requireMembership");
 const membersController = require("../controllers/memberships.controller");
 
-router.get(
+router.post(
   "/:orgId/members",
   requireAuth,
-  membersController.listMembers
+  requireMembership("admin"),
+  membersController.addMember
 );
 
-module.exports = router;                                                                                                                                                                                                                                                               
+module.exports = router;

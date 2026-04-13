@@ -1,30 +1,27 @@
-const { createTask } = require("../services/tasks.create.service");
-const { createTaskSchema } = require("../schemas/createTask.schema");
+const { createTask } = require("../services/tasks.service")
+const { createTaskSchema } = require("../schemas/createTask.schema")
+const asyncHandler = require("../utils/asyncHandler")
 
-async function createTaskController(req, res, next) {
-  try {
-    const parsed = createTaskSchema.parse(req.body);
+const createTaskController = asyncHandler(async (req, res) => {
 
-    const { orgId, projectId } = req.params;
-    const userId = req.user.id;
+  const parsed = createTaskSchema.parse(req.body)
 
-    const result = await createTask(
-      userId,
-      parseInt(projectId),
-      parseInt(orgId),
-      parsed.assignedTo || null,
-      parsed.title,
-      parsed.status,
-      parsed.description || null,
-      parsed.priority,
-      parsed.dueDays || null
-    );
+  const { orgId, projectId } = req.params
+  const userId = req.user.id
 
-    return res.status(201).json(result);
+  const result = await createTask({
+    userId,
+    orgId: parseInt(orgId, 10),
+    projectId: parseInt(projectId, 10),
+    title: parsed.title,
+    description: parsed.description ?? null,
+    priority: parsed.priority,
+    assignedTo: parsed.assignedTo ?? null,
+    dueDate: parsed.dueDate ?? null
+  })
 
-  } catch (err) {
-    next(err);
-  }
-}
+  return res.status(201).json(result)
 
-module.exports = { createTaskController };
+})
+
+module.exports = { createTaskController }

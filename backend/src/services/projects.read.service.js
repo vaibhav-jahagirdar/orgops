@@ -1,67 +1,134 @@
-const pool = require("../db");
+const pool = require("../db")
 
-async function listProjects({ orgId, page = 1, limit = 10, search, sort, order }) {
+const ALLOWED_SORTS = new Set(["created_at", "name"])
+const ALLOWED_ORDERS = new Set(["ASC", "DESC"])
 
-  page = Math.max(parseInt(page) || 1, 1);
-  limit = Math.min(Math.max(parseInt(limit) || 10, 1), 100);
-  const offset = (page - 1) * limit;
+function normalizeListOptions(raw = {}) {
+  const page = Math.max(parseInt(raw.page, 10) || 1, 1)
+  const limit = Math.min(Math.max(parseInt(raw.limit, 10) || 10, 1), 100)
+  const search = typeof raw.search === "string" ? raw.search.trim() : ""
 
-  const allowedSort = ["created_at", "name"];
-  const allowedOrder = ["ASC", "DESC"];
+  const sort =
+    typeof raw.sort === "string" && ALLOWED_SORTS.has(raw.sort)
+      ? raw.sort
+      : "created_at"
 
-  const safeSort = allowedSort.includes(sort) ? sort : "created_at";
-  const safeOrder = allowedOrder.includes(order?.toUpperCase())
-    ? order.toUpperCase()
-    : "DESC";
+  const orderRaw = typeof raw.order === "string" ? raw.order.toUpperCase() : "DESC"
+  const order = ALLOWED_ORDERS.has(orderRaw) ? orderRaw : "DESC"
 
-  const values = [orgId];
-  let where = `WHERE org_id = $1
-  AND archived_at IS NULL`;
+  return { page, limit, search, sort, order }
+}
+
+function buildWhereClause({ orgId, search }, params) {
+  params.push(orgId)
+  let where = `WHERE p.org_id = $${params.length} AND p.archived_at IS NULL`
 
   if (search) {
-    values.push(`%${search}%`);
-    where += ` AND name ILIKE $${values.length}`;
+    params.push(`%${search}%`)
+    where += ` AND p.name ILIKE $${params.length}`
   }
 
+  return where
+}
 
+function buildOrderBy(sort, order) {
+  if (sort === "name") {
+    return `ORDER BY p.name ${order}, p.id DESC`
+  }
+  return `ORDER BY p.created_at ${order}, p.id DESC`
+}
+
+async function listProjects(rawOptions = {}) {
+  const parsedOrgId = Number(rawOptions.orgId)
+  if (!Number.isInteger(parsedOrgId) || parsedOrgId <= 0) {
+    const err = new Error("Invalid orgId")
+    err.statusCode = 400
+    throw err
+  }
+
+  const { page, limit, search, sort, order } = normalizeListOptions(rawOptions)
+  const offset = (page - 1) * limit
+
+  const baseParams = []
+  const whereClause = buildWhereClause({ orgId: parsedOrgId, search }, baseParams)
+  const orderBy = buildOrderBy(sort, order)
 
   const countQuery = `
     SELECT COUNT(*)::int AS total
-    FROM projects
-    ${where}
-  `;
+    FROM projects p
+    ${whereClause}
+  `
 
-  const countResult = await pool.query(countQuery, values);
-  const total = countResult.rows[0].total;
-
-
-
-  const dataValues = [...values, limit, offset];
-
+  const dataParams = [...baseParams, limit, offset]
   const dataQuery = `
-    SELECT id, name, created_at, created_by
+    SELECT
+      p.id,
+      p.name,
+      p.created_at,
+      p.created_by,
+      COALESCE(task_stats.task_count, 0)::int AS task_count,
+      COALESCE(task_stats.todo_count, 0)::int AS todo_count,
+      COALESCE(task_stats.in_progress_count, 0)::int AS in_progress_count,
+      COALESCE(task_stats.done_count, 0)::int AS done_count,
+      COALESCE(task_stats.overdue_count, 0)::int AS overdue_count
+    FROM projects p
+    LEFT JOIN LATERAL (
+      SELECT
+        COUNT(*) AS task_count,
+        COUNT(*) FILTER (WHERE t.status = 'todo') AS todo_count,
+        COUNT(*) FILTER (WHERE t.status = 'in_progress') AS in_progress_count,
+        COUNT(*) FILTER (WHERE t.status = 'done') AS done_count,
+        COUNT(*) FILTER (
+          WHERE t.due_date IS NOT NULL
+            AND t.status <> 'done'
+            AND t.due_date < NOW()
+        ) AS overdue_count
+      FROM tasks t
+      WHERE t.project_id = p.id
+    ) AS task_stats ON TRUE
+    ${whereClause}
+    ${orderBy}
+    LIMIT $${dataParams.length - 1}
+    OFFSET $${dataParams.length}
+  `
+
+  const countsQuery = `
+    SELECT
+      COUNT(*)::int AS total,
+      COUNT(*) FILTER (WHERE archived_at IS NULL)::int AS active,
+      COUNT(*) FILTER (WHERE archived_at IS NOT NULL)::int AS archived
     FROM projects
-    ${where}
-    ORDER BY ${safeSort} ${safeOrder}, id DESC
-    LIMIT $${values.length + 1}
-    OFFSET $${values.length + 2}
-  `;
+    WHERE org_id = $1
+  `
 
-  const dataResult = await pool.query(dataQuery, dataValues);
+  const [countResult, dataResult, countsResult] = await Promise.all([
+    pool.query({ text: countQuery, values: baseParams }),
+    pool.query({ text: dataQuery, values: dataParams }),
+    pool.query({ text: countsQuery, values: [parsedOrgId] }),
+  ])
 
-  const totalPages = Math.ceil(total / limit);
+  const total = countResult.rows[0]?.total || 0
+  const totalPages = Math.max(Math.ceil(total / limit), 1)
 
   return {
     data: dataResult.rows,
-    pagination: {
+    meta: {
       page,
       limit,
       total,
       totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1
-    }
-  };
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+      search,
+      sort,
+      order,
+    },
+    counts: countsResult.rows[0] || {
+      total: 0,
+      active: 0,
+      archived: 0,
+    },
+  }
 }
 
-module.exports = { listProjects };
+module.exports = { listProjects }

@@ -1,33 +1,30 @@
 const { listMembersForOrg } = require("../services/members.read.service");
-const pool = require("../db");
+const asyncHandler = require("../utils/asyncHandler");
 
-async function listMembers(req, res) {
-  try {
-    const orgId = req.params.orgId;
-    const actorUserId = req.user.id;
-
-    const actorMembership = await pool.query(
-      `
-      SELECT 1
-      FROM membership
-      WHERE user_id = $1 AND org_id = $2
-      `,
-      [actorUserId, orgId]
-    );
-
-    if (actorMembership.rowCount === 0) {
-      return res.status(403).json({ error: "FORBIDDEN" });
-    }
-
-
-    const members = await listMembersForOrg(orgId);
-
-
-    res.json({ members });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
+const listOrgMembersController = asyncHandler(async (req, res) => {
+  const { orgId } = req.params;
+  const currentUserRole = req.membership.role;
+  if (!orgId) {
+    return res.status(400).json({
+      message: "orgId is required",
+    });
   }
-}
 
-module.exports = { listMembers };
+  const result = await listMembersForOrg(orgId, {
+    page: req.query.page,
+    limit: req.query.limit,
+    search: req.query.search,
+    role: req.query.role,
+    sort: req.query.sort,
+  });
+
+  return res.status(200).json({
+    message: "Members fetched successfully",
+    ...result,
+    currentUserRole
+  });
+});
+
+module.exports = {
+  listOrgMembersController,
+};

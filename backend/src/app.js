@@ -8,6 +8,11 @@ const orgWriteRoutes = require("./routes/orgs.route")
 const errorHandler = require("./middleware/errorHandler");
 const projectReadRoutes = require("./routes/project.list.route")
 const projectWriteRoutes = require("./routes/projects.routes")
+const taskWriteRoutes = require("./routes/tasks.route")
+const dashboardReadRoute = require("./routes/dashboard.read.route")
+const membersReadRoute = require("./routes/members.read.route")
+const membersWriteRoute = require("./routes/membership.route")
+
 
 const app = express();
 
@@ -18,12 +23,15 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
-
+app.use("/orgs", membersWriteRoute)
 app.use("/auth", authRoutes)
 app.use("/orgs", orgReadRoutes)
 app.use("/orgs", orgWriteRoutes)
 app.use("/orgs", projectReadRoutes)
 app.use("/orgs", projectWriteRoutes)
+app.use("/orgs", taskWriteRoutes)
+app.use("/orgs", dashboardReadRoute)
+app.use("/orgs",membersReadRoute)
 
 app.use(errorHandler);
 

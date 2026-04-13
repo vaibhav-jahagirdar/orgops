@@ -1,31 +1,41 @@
-const { z } = require("zod");
+const { z } = require("zod")
 
-const listProjectsSchema = z.object({
-  page: z
-    .string()
-    .optional()
-    .transform(val => (val ? parseInt(val, 10) : 1))
-    .refine(val => val > 0, { message: "Invalid page" }),
+const ALLOWED_SORTS = ["created_at", "name"]
+const ALLOWED_ORDERS = ["asc", "desc"]
 
-  limit: z
-    .string()
-    .optional()
-    .transform(val => (val ? parseInt(val, 10) : 10))
-    .refine(val => val > 0 && val <= 100, {
-      message: "Limit must be between 1 and 100",
-    }),
+const listProjectsQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
 
-  search: z.string().optional(),
+    search: z
+      .string()
+      .trim()
+      .max(100)
+      .optional()
+      .transform((v) => (v && v.length ? v : undefined)),
 
-  sort: z
-    .enum(["name", "created_at"])
-    .optional()
-    .default("created_at"),
+    sort: z
+      .enum(ALLOWED_SORTS)
+      .optional()
+      .default("created_at"),
 
-  order: z
-    .enum(["ASC", "DESC"])
-    .optional()
-    .default("DESC"),
-});
+  
+    order: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .refine((v) => ALLOWED_ORDERS.includes(v), {
+        message: "order must be 'asc' or 'desc'",
+      })
+      .optional()
+      .default("desc")
+      .transform((v) => v.toUpperCase()),
+  })
+  .strict()
 
-module.exports = { listProjectsSchema };
+module.exports = {
+  listProjectsQuerySchema,
+  ALLOWED_SORTS,
+  ALLOWED_ORDERS,
+}

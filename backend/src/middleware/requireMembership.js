@@ -12,10 +12,13 @@ function requireMembership(minRole) {
     const { orgId } = req.params;
 
     const result = await pool.query(
-      `SELECT role FROM membership
-             WHERE user_id = $1 AND org_id = $2`,
-      [userId, orgId],
-    );
+  `SELECT membership_id, user_id, org_id, role
+   FROM membership
+   WHERE user_id = $1 AND org_id = $2`,
+  [userId, orgId],
+);
+
+const membership = result.rows[0];
 
     if (result.rowCount === 0) {
       return res.status(403).json({ error: "FORBIDDEN" });
@@ -28,7 +31,7 @@ function requireMembership(minRole) {
       }
     }
 
-    req.membership = { role: userRole };
+    req.membership = membership
     next();
   };
 }

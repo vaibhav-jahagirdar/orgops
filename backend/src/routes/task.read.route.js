@@ -4,21 +4,13 @@ const router = express.Router();
 const requireAuth = require("../middleware/requireAuth");
 const requireMembership = require("../middleware/requireMembership");
 
-const { listTasksController } = require("../controllers/tasks.list.controller");
+const { getTaskByIdController } = require("../controllers/task.read.controller");
 
 router.get(
-  "/orgs/:orgId/tasks",
+  "/orgs/:orgId/tasks/:taskId",
   requireAuth,
   requireMembership(),
-  listTasksController
-);
-
-
-router.get(
-  "/orgs/:orgId/projects/:projectId/tasks",
-  requireAuth,
-  requireMembership(),
-  listTasksController
+  getTaskByIdController
 );
 
 module.exports = router;
