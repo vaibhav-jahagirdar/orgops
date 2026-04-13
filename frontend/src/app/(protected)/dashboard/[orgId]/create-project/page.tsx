@@ -1,17 +1,20 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCreateProject } from '@/features/projects/hooks'
+import { useCreateProject } from '@/features/addProjects/hooks'
 import { useForm } from 'react-hook-form'
-import { projectInput, projectSchema } from '@/features/projects/schema'
+import { projectInput, projectSchema } from '@/features/addProjects/schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
+import { useParams } from 'next/navigation'
 
 export default function CreateProject() {
   const router = useRouter()
   const projectMutation = useCreateProject()
+  const params = useParams()
+const orgId =  params.orgId
 
   const {
     register,
@@ -21,8 +24,10 @@ export default function CreateProject() {
 
   const onSubmit = async (data: projectInput) => {
     try {
-      await projectMutation.mutateAsync(data)
-      router.push('/')
+       const res = await projectMutation.mutateAsync(data)
+       console.log("CREATE PROJECT RESPONSE", res)
+       const projectId = res.project.id
+        router.push(`/dashboard/${orgId}/projects/${projectId}/tasks/create`)
     } catch (error) {
 
     }
@@ -80,7 +85,7 @@ export default function CreateProject() {
                     <div className="absolute inset-0 rounded-xl bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                   </div>
 
-                  {/* Error message */}
+               
                   {errors.name && (
                     <p className="text-sm text-destructive font-medium animate-fade-in">
                       {errors.name.message}

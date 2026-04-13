@@ -1,35 +1,26 @@
 import { z } from "zod"
 
 export const taskSchema = z.object({
-  title: z
-    .string()
-    .min(3, "Task name must be atleast 3 characters")
-    .max(50, "Task name cannot be more than 50 characters")
-    .transform((v) => v.trim()),
+  title: z.string().trim().min(3).max(50),
 
   description: z
     .string()
-    .max(200, "Task description cannot be more than 200 characters")
-    .transform((v) => v.trim())
+    .trim()
+    .max(200)
     .optional()
-    .nullable(),
+    .or(z.literal("").transform(() => undefined)),
 
-  status: z.enum(["todo", "in_progress", "done"]),
+  status: z.enum(["todo", "in_progress", "done"]).default("todo"),
 
   priority: z.enum(["low", "medium", "high"]),
 
-  assigned_to: z
-    .number()
-    .int()
-    .positive()
-    .optional()
-    .nullable(),
+  assignedTo: z.number().int().positive().optional(),
 
-  due_date: z
-    .string()
-    .datetime()
-    .optional()
-    .nullable()
+  dueDate: z.date().optional(),
 })
 
-export type TaskInput = z.infer<typeof taskSchema>
+export const createTaskSchema = taskSchema.omit({
+  status: true,
+})
+
+export type TaskInput = z.infer<typeof createTaskSchema>

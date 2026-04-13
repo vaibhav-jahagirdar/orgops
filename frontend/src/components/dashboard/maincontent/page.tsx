@@ -1,167 +1,236 @@
 "use client"
 
-import { ArrowBigRight, ArrowRight, Building2, CheckSquare, File, FileExclamationPointIcon, Folder, FolderArchive, FolderCheck, FolderCodeIcon, FolderOpen, Users } from "lucide-react"
+import { Folder, CheckSquare, AlertTriangle, Users, Plus } from "lucide-react"
 import Link from "next/link"
 
-type Org = {
-    id: number
-    name: string
-    role: "owner" | "admin" | "member"
-    member_count: number
+type DashboardData = {
+  kpis: {
+    activeProjects: number
+    dueToday: number
+    overdue: number
+    completionRate: number
+    members: number
+  }
+  myTasks: {
+    overdue: any[]
+    today: any[]
+    upcoming: any[]
+  }
+  deadlines: any[]
+  projects: any[]
+  activity: any[]
+  insights: {
+    overloadedUsers: any[]
+    unassignedTasks: number
+    riskyProjects: number
+  }
 }
 
-type User = {
-    id: number
-    email: string
-    name: string
-}
-type Project = {
-    id: number
-    name: string
-
-
-}
-export function Maincontent({ orgs, currentOrg, userInfo, projects, pagination }: {
-    orgs: Org[]
-    currentOrg: Org
-    userInfo: User
-    projects: Project[]
-    pagination: any
+export function Maincontent({
+  currentOrg,
+  userInfo,
+  dashboardData
+}: {
+  currentOrg: any
+  userInfo: any
+  dashboardData: DashboardData
 }) {
-    const orgInfo = [{
-        title: "Active Projects",
-        count: pagination.total,
-        icon: FolderOpen
+  const isAdmin = ["owner", "admin"].includes(currentOrg.role)
+  const { kpis, myTasks, deadlines, projects, activity, insights } = dashboardData
 
-    },
-    {
-        title: "Your Tasks",
-        count: pagination.total,
-        icon: CheckSquare
+  return (
+    <div className="space-y-6 p-4 sm:p-6">
+      {/* KPI CARDS */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
+        <Card title="Projects" value={kpis.activeProjects} icon={Folder} />
+        <Card title="Due Today" value={kpis.dueToday} icon={CheckSquare} />
+        <Card title="Overdue" value={kpis.overdue} icon={AlertTriangle} highlight />
+        {isAdmin && <Card title="Members" value={kpis.members} icon={Users} />}
+      </div>
 
-    },
-    {
-        title: "Team Members",
-        count: pagination.total,
-        icon: Users
+      {/* MAIN GRID */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className={isAdmin ? "lg:col-span-7" : "lg:col-span-8"}>
+          <Section
+            title="Your Work"
+            action={
+              <Link
+                href={`/dashboard/${currentOrg.id}/tasks/create`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Task
+              </Link>
+            }
+          >
+            {[...myTasks.overdue, ...myTasks.today, ...myTasks.upcoming].length === 0 && (
+              <Empty text="No tasks assigned" />
+            )}
 
-    },
-    {
-        title: "Pending Tasks",
-        count: pagination.total,
-        icon: FileExclamationPointIcon
+            {myTasks.overdue.map((t) => (
+              <Row key={t.id} title={t.title} sub={t.project} right="Overdue" danger />
+            ))}
 
-    }]
-    return (
-        <div className="flex flex-col gap-5 ">
-            <div className="border flex-col border-gray-300/70 rounded-lg max-w-9/12 bg-gray-100/75 p-6">
-                <div className="flex gap-4 px-4">
-                    <Building2 className="shrink-0 border rounded-md h-9 w-9 p-1.75" strokeWidth={1.8} />
-                    <p className="font-semibold text-lg">{currentOrg.name}</p>
-                </div>
-                <div className="flex flex-col pl-16">
-                    <p className="text-xs font-light tracking-tight  ">Eterprise software solutions</p>
-                    <div className="flex gap-3">
-                        <p className=" pt-3 text-xs">{currentOrg.member_count} members</p>
-                        <span className="text-xs mt-3 text-blue-600 border border-gray-500/80 px-2 rounded-xl py-px" >{currentOrg.role}</span>
-                    </div>
-                </div>
+            {myTasks.today.map((t) => (
+              <Row key={t.id} title={t.title} sub={t.project} right="Today" />
+            ))}
 
-            </div>
-            <div className="flex gap-5.25 ">
-                {orgInfo.map((info) => {
-                    const Icon = info.icon
-                    return (
-                        <div key={info.title} >
-                            <div className="flex flex-col">
-                                <div className="flex justify-around border  border-gray-300/75 bg-gray-300/10 w-55 h-30 rounded-lg ">
-                                    <div className="flex flex-col justify-between">
-                                        <p className="text-xs font-semibold pt-5 tracking-tight">{info.title}</p>
-                                        <p className="font-bold text-2xl pb-6 ">{info.count}</p>
-                                    </div>
-                                    <Icon className="border my-3 bg-gray-200/15  border-gray-300/85 px-px py-1.5  rounded-lg  h-8 w-8 shrink-0" />
-
-                                </div>
-
-
-
-                            </div>
-
-
-
-
-                        </div>
-                    )
-                }
-
-
-                )}
-
-            </div>
-            <div className="border border-gray-300/75 bg-gray h-48 rounded-lg max-w-6/12 flex flex-col gap-10  bg-gray-300/10">
-                <div className="flex justify-between">
-                    <div className="flex pt-5">
-                        <FolderOpen className="shrink-0 h-4 w-4 ml-5" />
-                        <p className="font-semibold text-sm pl-3">Projects</p>
-                    </div>
-                    <div className="  px-3 py-px shadow-md mt-3 rounded-xl hover:scale-105 transition   mr-2  bg-gray-800/75">
-                        <Link
-                        href={`/dashboard/${currentOrg.id}/create-project`}
-                        className="text-xs font-semibold py-1 text-gray-100/95 transition duration-600 ease-in-out hover:scale-105 ">+ New Project
-                        </Link>
-                    </div>
-
-
-                </div>
-                <div className="flex">
-                {projects.map((project) => (
-                    <div  key={project.id}
-                    className="border border-gray-300/45 w-80 h-22 rounded-lg mr-4 ml-4 pl-4 pt-1 bg-gray-50">
-                        <div className="flex flex-col   ">
-                            <div className="flex  border-b pb-4 justify-between">
-                                <p className="text-sm tracking-tight pt-1 ">{project.name}</p>
-                                <Link
-                                href={`/`}>
-                                    <ArrowRight />
-                                </Link>
-
-                            </div>
-                            <div className="pt-2">
-                                <p className="text-xs">
-                                {currentOrg.member_count} Members 
-                            </p>
-                            </div>
-                    
-                            
-
-                        </div>
-
-                    </div>
-
-                ))}
-            </div>
-             <div className="flex border border-gray-300/75 rounded-lg  flex-col">
-                <div className="flex justify-between">
-                    <div className="flex gap-2 pl-3">
-                        <CheckSquare className="h-5 w-5 shrink-0 "/>
-                        <span className="tracking-tight font-semibold">Your Tasks</span>
-                       
-                    </div>
-                     <div className=" px-3 py-px shadow-md mt-px rounded-xl hover:scale-105 transition   mr-2  bg-gray-800/75">
-                        <Link
-                        href={`/dashboard/${currentOrg.id}/create-project`}
-                        className="text-xs font-semibold py-1 text-gray-100/95 transition duration-600 ease-in-out hover:scale-105 ">+ Create Task
-                        </Link>
-                    </div>
-                    
-                </div>
-
-             </div>
-            </div>
-            
-
-
-
+            {myTasks.upcoming.map((t) => (
+              <Row key={t.id} title={t.title} sub={t.project} right={t.due_date} />
+            ))}
+          </Section>
         </div>
-    )
+
+        <div className={`${isAdmin ? "lg:col-span-5" : "lg:col-span-4"} space-y-6`}>
+          <Section title="Deadlines">
+            {deadlines.length === 0 && <Empty text="No upcoming deadlines" />}
+
+            {deadlines.map((d) => (
+              <Row key={d.id} title={d.title} sub={d.project} right={d.due_date} />
+            ))}
+          </Section>
+
+          {isAdmin && (
+            <Section title="Insights">
+              <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                <span className="mr-1 text-amber-500">⚠</span>
+                {insights.unassignedTasks} unassigned tasks
+              </p>
+              <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                <span className="mr-1 text-amber-500">⚠</span>
+                {insights.riskyProjects} risky projects
+              </p>
+              <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                <span className="mr-1 text-amber-500">⚠</span>
+                {insights.overloadedUsers.length} overloaded users
+              </p>
+            </Section>
+          )}
+        </div>
+
+        {isAdmin && (
+          <div className="lg:col-span-6">
+            <Section
+              title="Project Health"
+              action={
+                <Link
+                  href={`/dashboard/${currentOrg.id}/projects/create`}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Project
+                </Link>
+              }
+            >
+              {projects.length === 0 && <Empty text="No projects yet" />}
+
+              {projects.map((p) => (
+                <div key={p.id} className="space-y-1.5 rounded-lg border border-zinc-200/80 bg-zinc-50/60 p-3 dark:border-zinc-800 dark:bg-zinc-900/40">
+                  <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                    {p.name}
+                  </p>
+                  <div className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+                    <div
+                      className="h-2 rounded-full bg-zinc-900 dark:bg-zinc-100"
+                      style={{ width: `${p.progress}%` }}
+                    />
+                  </div>
+                  {p.overdueTasks > 0 && (
+                    <p className="text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {p.overdueTasks} overdue
+                    </p>
+                  )}
+                </div>
+              ))}
+            </Section>
+          </div>
+        )}
+
+        <div className={isAdmin ? "lg:col-span-6" : "lg:col-span-12"}>
+          <Section title="Activity">
+            {activity.length === 0 && <Empty text="No recent activity" />}
+
+            {activity.map((a) => (
+              <p
+                key={a.id}
+                className="rounded-md border border-zinc-200/70 px-3 py-2 text-sm text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
+              >
+                {a.message}
+              </p>
+            ))}
+          </Section>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Card({ title, value, icon: Icon, highlight }: any) {
+  return (
+    <div
+      className={`rounded-xl border bg-white p-4 shadow-sm dark:bg-zinc-950 ${
+        highlight
+          ? "border-rose-200 dark:border-rose-900/60"
+          : "border-zinc-200 dark:border-zinc-800"
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          {title}
+        </p>
+        <Icon
+          className={`h-4 w-4 ${
+            highlight ? "text-rose-500" : "text-zinc-500 dark:text-zinc-400"
+          }`}
+        />
+      </div>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+        {value}
+      </p>
+    </div>
+  )
+}
+
+function Section({ title, children, action }: any) {
+  return (
+    <section className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+          {title}
+        </h2>
+        {action}
+      </div>
+      <div className="space-y-2">{children}</div>
+    </section>
+  )
+}
+
+function Row({ title, sub, right, danger }: any) {
+  return (
+    <div className="flex items-start justify-between rounded-lg border border-transparent px-2 py-2 transition hover:border-zinc-200 hover:bg-zinc-50 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/50">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
+          {title}
+        </p>
+        <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{sub}</p>
+      </div>
+      <span
+        className={`ml-3 shrink-0 text-xs font-medium ${
+          danger
+            ? "text-rose-600 dark:text-rose-400"
+            : "text-zinc-500 dark:text-zinc-400"
+        }`}
+      >
+        {right}
+      </span>
+    </div>
+  )
+}
+
+function Empty({ text }: { text: string }) {
+  return (
+    <p className="rounded-lg border border-dashed border-zinc-300 px-3 py-3 text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
+      {text}
+    </p>
+  )
 }

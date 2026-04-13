@@ -1,9 +1,18 @@
 "use client"
 
-import { Check, CheckSquare, ChevronDown, FolderKanban,Folder, Infinity, LayoutDashboard, Link2, Orbit, Power, Repeat, Settings, Shield, Users, Building } from "lucide-react"
+import {
+  Check,
+  CheckSquare,
+  ChevronDown,
+  Folder,
+  Infinity,
+  LayoutDashboard,
+  Settings,
+  Shield,
+  Users
+} from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-
 import Link from "next/link"
 import { Building2Icon } from "lucide-react"
 
@@ -13,8 +22,10 @@ type Org = {
   role: "owner" | "admin" | "member"
 }
 
-
-export function Sidebar({ currentOrg, orgs }: {
+export function Sidebar({
+  currentOrg,
+  orgs
+}: {
   currentOrg: Org
   orgs: Org[]
 }) {
@@ -22,124 +33,157 @@ export function Sidebar({ currentOrg, orgs }: {
   const [open, setOpen] = useState(false)
   const base = `/dashboard/${currentOrg.id}`
 
-  const mainLinks = [{
-    label: "Dashboard",
-    href: base,
-    icon: LayoutDashboard
-  }, {
-    label: "Projects",
-    href: `${base}/Projects`,
-    icon: Folder,
-  }, {
-    label: "Tasks",
-    href: `${base}/tasks`,
-    icon: CheckSquare
-  }, {
-    label: "Members",
-    href: `${base}/members`,
-    icon: Users
-  },
+  const mainLinks = [
+    {
+      label: "Dashboard",
+      href: base,
+      icon: LayoutDashboard
+    },
+    {
+      label: "Projects",
+      href: `${base}/Projects`,
+      icon: Folder
+    },
+    {
+      label: "Tasks",
+      href: `${base}/tasks`,
+      icon: CheckSquare
+    },
+    {
+      label: "Members",
+      href: `${base}/members`,
+      icon: Users
+    }
   ]
-  const adminLinks = currentOrg.role === "owner" || currentOrg.role === "admin" ? [
-    {
-      label: "Team Management",
-      href: `${base}/team`,
-      icon: Shield
-    },
-    {
-      label: "Settings",
-      href: `${base}/settings`,
-      icon: Settings
-    },
-  ] : []
+
+  const adminLinks =
+    currentOrg.role === "owner" || currentOrg.role === "admin"
+      ? [
+          {
+            label: "Team Management",
+            href: `${base}/team`,
+            icon: Shield
+          },
+          {
+            label: "Settings",
+            href: `${base}/settings`,
+            icon: Settings
+          }
+        ]
+      : []
 
   return (
-    <aside className="w-57 border-r min-h-screen border-gray-400/25 bg-background flex flex-col ml-1">
-      <div className="flex gap-1 broder-b px-5 bg-gray-100   rounded-md py-4">
-        <Infinity  className="w-8 h-8 shrink-0 pt-1 bg-gray-100 rounded-md "/>
-        <p className="tracking-tight font-semibold pt-1 text-2xl pl-1 ">OrgOps</p>
-
-      </div>
-      <div className="border-b border-gray-300/25 px-6 py-4 relative bg-gray-100 rounded-md mt-px">
-        <button
-          onClick={() => setOpen((p) => !p)
-          }
-          className="flex w-full items-center justify-between text-left">
-          <div className="bg-gray-100 ">
-            <div className="flex gap-2">
-              <Building2Icon size={29}  className="bg-gray-900 p-1 text-gray-50 rounded-lg " />
-            <p className="text-base font-light tracking-tight flex text-gray-800 ">
-              Current Org
-            </p>
+    <aside className="sticky top-0 z-40 h-screen w-[280px] max-w-[82vw] border-r border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="flex h-full flex-col">
+        {/* Brand */}
+        <div className="border-b border-border/60 px-5 py-4">
+          <div className="flex items-center gap-2">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 ring-1 ring-border/60">
+              <Infinity className="h-5 w-5 text-primary" />
             </div>
-            <p className="font-semibold text-base bg-gray-100 px-2 py-1 rounded-lg ml-7 tracking-tight truncate max-w-45">
-              {currentOrg.name}
-            </p>
+            <p className="text-lg font-semibold tracking-tight">OrgOps</p>
           </div>
-          <ChevronDown className="h-5 w-5" />
-        </button>
-        {open && (
-          <div className="absolute left-6 right-6 mt-4 rounded-md border bg-background shadow-md z-50">
-            {orgs.map((org) => (
-              <Link
-                key={org.id}
-                href={`/dashboard/${org.id}`}
-                className="flex items-center justify-between px-4   py-2 text-sm hover:bg-muted">
-                {org.name} 
-                {org.id === currentOrg.id && (
-                  <Check className="h-4 w-4 text-primary" />
-                )}
-              </Link>
-            ))}
+        </div>
 
-          </div>
-        )}
-      </div>
-     <div className=" flex-1 overflow-y-auto   rounded-md mt-px">
-  <div className="bg-gray-100 px-3 py-5">
-    <nav className="space-y-1">
-      {mainLinks.map((link) => {
-        const isActive = pathname === link.href || pathname.startsWith(link.href + "/")
-        const Icon  = link.icon
-         return(
-          <Link
-          key={link.href}
-          href={link.href}
-          className={`group flex items-center gap-3 rounded-md px-2 py-2 text-sm tracking-tight font-medium trasnsition colors ${isActive ? "bg-primary text-primary-foreground " : "text-gray-600 hover:bg-gray-300/75 hover:text-foreground"}`}>
-            <Icon className="h-4 w-4 shrink-0"/>
-            {link.label}
-          </Link>
-         )
-      })}
-    </nav>
-  </div>
+        {/* Org Switcher */}
+        <div className="relative border-b border-border/60 px-4 py-4">
+          <button
+            onClick={() => setOpen((p) => !p)}
+            className="group flex w-full items-center justify-between rounded-xl border border-border/70 bg-muted/30 px-3 py-3 text-left transition hover:bg-muted/50"
+          >
+            <div className="min-w-0">
+              <div className="mb-1 flex items-center gap-2">
+                <Building2Icon className="h-4 w-4 text-muted-foreground" />
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Current org
+                </p>
+              </div>
+              <p className="truncate text-sm font-semibold">{currentOrg.name}</p>
+            </div>
+            <ChevronDown
+              className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
+                open ? "rotate-180" : ""
+              }`}
+            />
+          </button>
 
-  {adminLinks.length > 0 && (
-    <div className="mt-1 rounded-md  bg-gray-100">
-      <p className=" tracking-tight font-semibold px-3 text-lg    text-gray-900 mb-3 pt-3">
-        Admin
-      </p>
-      <div>
-        <nav>
-          {adminLinks.map((link) => {
-            const isActive = pathname === link.href || pathname.startsWith(link.href + "/")
-            const Icon = link.icon 
-            return (
-              <Link
-              key={link.href}
-              href={link.href}
-              className={`group flex gap-3 px-3 py-2 text-sm  text-muted-foreground rounded-md font-medium transition colors ${isActive ? "bg-primary text-primary-foreground" : "text-gray-600 hover:bg-gray-300/75  hover:text-foreground"}`}  >
-                <Icon className="h-4 w-4 shrink-0" />
-                {link.label}
-              </Link>
-            )
-          })}
-        </nav>
+          {open && (
+            <div className="absolute left-4 right-4 top-[calc(100%-2px)] z-50 mt-2 overflow-hidden rounded-xl border border-border bg-popover shadow-lg">
+              <div className="max-h-64 overflow-auto p-1">
+                {orgs.map((org) => (
+                  <Link
+                    key={org.id}
+                    href={`/dashboard/${org.id}`}
+                    className="flex items-center justify-between rounded-lg px-3 py-2 text-sm transition hover:bg-muted"
+                  >
+                    <span className="truncate">{org.name}</span>
+                    {org.id === currentOrg.id && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex-1 overflow-y-auto px-3 py-4">
+          <nav className="space-y-1">
+            {mainLinks.map((link) => {
+              const isActive =
+                pathname === link.href || pathname.startsWith(link.href + "/")
+              const Icon = link.icon
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{link.label}</span>
+                </Link>
+              )
+            })}
+          </nav>
+
+          {adminLinks.length > 0 && (
+            <div className="mt-6">
+              <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Admin
+              </p>
+              <nav className="space-y-1">
+                {adminLinks.map((link) => {
+                  const isActive =
+                    pathname === link.href ||
+                    pathname.startsWith(link.href + "/")
+                  const Icon = link.icon
+
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                        isActive
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{link.label}</span>
+                    </Link>
+                  )
+                })}
+              </nav>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  )}
-</div>
-      
     </aside>
   )
 }
