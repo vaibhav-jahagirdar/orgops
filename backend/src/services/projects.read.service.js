@@ -1,4 +1,5 @@
 const pool = require("../db")
+console.log("🔥 USING projects.read.service.js V2")
 
 const ALLOWED_SORTS = new Set(["created_at", "name"])
 const ALLOWED_ORDERS = new Set(["ASC", "DESC"])
@@ -66,12 +67,15 @@ async function listProjects(rawOptions = {}) {
       p.name,
       p.created_at,
       p.created_by,
+      u.name AS created_by_name,
+      u.email AS created_by_email,
       COALESCE(task_stats.task_count, 0)::int AS task_count,
       COALESCE(task_stats.todo_count, 0)::int AS todo_count,
       COALESCE(task_stats.in_progress_count, 0)::int AS in_progress_count,
       COALESCE(task_stats.done_count, 0)::int AS done_count,
       COALESCE(task_stats.overdue_count, 0)::int AS overdue_count
     FROM projects p
+    LEFT JOIN users u ON p.created_by = u.id
     LEFT JOIN LATERAL (
       SELECT
         COUNT(*) AS task_count,
@@ -109,7 +113,7 @@ async function listProjects(rawOptions = {}) {
 
   const total = countResult.rows[0]?.total || 0
   const totalPages = Math.max(Math.ceil(total / limit), 1)
-
+console.log("ROW SAMPLE:", dataResult.rows[0])
   return {
     data: dataResult.rows,
     meta: {

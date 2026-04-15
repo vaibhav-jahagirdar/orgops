@@ -1,9 +1,10 @@
 const { listProjects } = require("../services/projects.read.service");
 const { listProjectsSchema } = require("../schemas/project.schema.list");
 
-const { listProjectsQuerySchema } = require("./schema")
+const { listProjectsQuerySchema } = require("../schemas/project.schema.list")
 
 async function getProjects(req, res, next) {
+  const currentUserRole = req.membership.role;
   try {
     const orgId = Number(req.params.orgId)
 
@@ -23,6 +24,7 @@ async function getProjects(req, res, next) {
     const result = await listProjects({
       orgId,
       ...parsedQuery.data,
+      currentUserRole
     })
 
     return res.status(200).json(result)

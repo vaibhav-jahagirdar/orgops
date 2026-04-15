@@ -12,6 +12,7 @@ const taskWriteRoutes = require("./routes/tasks.route")
 const dashboardReadRoute = require("./routes/dashboard.read.route")
 const membersReadRoute = require("./routes/members.read.route")
 const membersWriteRoute = require("./routes/membership.route")
+const projectDetailRoute = require("./routes/project.read.route")
 
 
 const app = express();
@@ -32,6 +33,7 @@ app.use("/orgs", projectWriteRoutes)
 app.use("/orgs", taskWriteRoutes)
 app.use("/orgs", dashboardReadRoute)
 app.use("/orgs",membersReadRoute)
+app.use("/orgs", projectDetailRoute)
 
 app.use(errorHandler);
 
