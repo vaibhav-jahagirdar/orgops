@@ -26,6 +26,8 @@ export const projectSchema = z.object({
   name: z.string(),
   created_at: z.string(), 
   created_by: z.number(),
+  created_by_name: z.string(),
+  created_by_email: z.string(),
 
   
   task_count: z.number().optional(),

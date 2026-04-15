@@ -16,8 +16,8 @@ export function useMembers(orgId: number, query?: Partial<ListMembersQuery>) {
       query?.sort ?? "role",
     ],
     queryFn: () => getMembersRequest(orgId, query),
-    enabled: isValidOrgId,       // critical
-    retry: false,                // temporary: exposes real error instead of loops
+    enabled: isValidOrgId,       
+    retry: false,               
     refetchOnWindowFocus: false,
   });
 }

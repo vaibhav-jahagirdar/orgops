@@ -37,9 +37,9 @@ export default function ToolBar({ query, setQuery }: Props) {
   return (
     <div className="rounded-2xl border bg-background/80 p-4">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        {/* Left: Controls */}
+      
         <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(320px,1fr)_180px_220px_auto]">
-          {/* Search */}
+        
           <div className="sm:col-span-2 xl:col-span-1">
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
               Search
@@ -61,7 +61,7 @@ export default function ToolBar({ query, setQuery }: Props) {
             </div>
           </div>
 
-          {/* Role */}
+       
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
               Role
@@ -91,7 +91,7 @@ export default function ToolBar({ query, setQuery }: Props) {
             </Select>
           </div>
 
-          {/* Sort */}
+
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
               Sort
@@ -102,7 +102,7 @@ export default function ToolBar({ query, setQuery }: Props) {
                 setQuery((prev) => ({
                   ...prev,
                   sort: value as ListMembersQuery["sort"],
-                  page: 1, // important for manual pagination UX
+                  page: 1, 
                 }))
               }
             >
@@ -119,7 +119,6 @@ export default function ToolBar({ query, setQuery }: Props) {
             </Select>
           </div>
 
-          {/* Clear */}
           <div className="flex items-end">
             <Button
               type="button"
@@ -134,13 +133,13 @@ export default function ToolBar({ query, setQuery }: Props) {
           </div>
         </div>
 
-        {/* Right: CTA */}
+ 
         <div className="flex w-full items-end justify-start xl:w-auto xl:justify-end">
           <AddMembers />
         </div>
       </div>
 
-      {/* Optional active filter hint */}
+  
       {hasActiveFilters && (
         <div className="mt-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground">
           <SlidersHorizontal className="h-3.5 w-3.5" />
