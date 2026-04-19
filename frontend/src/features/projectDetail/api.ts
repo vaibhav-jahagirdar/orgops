@@ -18,8 +18,8 @@ export async function fetchProjectDetail(
     const res = await api.get<{ data: unknown }>(
       `/orgs/${orgId}/projects/${projectId}`
     )
-
-    const parsed = projectDetailResponseSchema.parse(res.data.data)
+const { data: payload, currentUserRole } = res.data as any
+const parsed = projectDetailResponseSchema.parse({ ...payload, currentUserRole })
 
     return parsed
 

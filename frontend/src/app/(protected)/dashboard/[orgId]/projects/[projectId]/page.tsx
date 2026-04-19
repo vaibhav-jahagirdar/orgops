@@ -4,6 +4,7 @@ import { useProjectDetail } from "@/features/projectDetail/hooks"
 import { useParams } from "next/navigation"
 import ProjectHeader from "@/components/projectDetail/projectHeader"
 import ProjectStats from "@/components/projectDetail/projectStats"
+import ProjectInfo from "@/components/projectDetail/projectInfo"
 
 
 export default function ProjectDetailPage() {
@@ -18,6 +19,8 @@ export default function ProjectDetailPage() {
         return <div>Loading...</div>
     }
     if (isError || !data) {
+        console.log("ERROR LOADING PROJECT DETAIL", isError)
+        console.log("ERROR LOADING PROJECT DETAIL - NO DATA", !data)
         return <div>Error loading project details.</div>
     }
 
@@ -25,6 +28,7 @@ export default function ProjectDetailPage() {
         <div>
         <ProjectHeader project={data.project} creator={data.creator} health={data.health}/>
         <ProjectStats stats={data.stats}/>
+        <ProjectInfo tasks={data.tasks} members={data.membersPreview} currentUserRole={data.currentUserRole} />
 
         </div>
     )

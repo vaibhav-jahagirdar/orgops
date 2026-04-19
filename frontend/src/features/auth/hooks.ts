@@ -8,15 +8,16 @@ export type User = {
     orgs: { id: number; name: string; role: string }[]
 }
 
-export async function getMeRequest(): Promise<User> {
-    const res = await api.get("/auth/me")
+export async function getMeRequest(token?: string): Promise<User> {
+    const res = await api.get("/auth/me", {
+        headers: token ? { Cookie: `accessToken=${token}` } : undefined,
+    })
     return res.data
 }
-
 export function useMe() {
     return useQuery<User>({
         queryKey: ["me"],
-        queryFn: getMeRequest, 
+        queryFn: () => getMeRequest(),
         refetchOnWindowFocus: false
     })
 }

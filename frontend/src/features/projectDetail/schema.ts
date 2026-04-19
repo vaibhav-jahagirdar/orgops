@@ -43,26 +43,31 @@ export const projectStatsSchema = z.object({
 
 export const memberPreviewSchema = z.object({
   id: z.number().int().positive(),
-  name: z.string().nullable(),
-  email: z.string().email().nullable(),
+  name: z.string(),
+  email: z.string().email(),       
 })
+
 
 export const taskAssigneeSchema = z.object({
   id: z.number().int().positive(),
-  name: z.string().nullable(),
-  email: z.string().email().nullable(),
+  name: z.string(),                 
+  email: z.string().email(),        
 })
-
+export const taskStatusSchema = z.enum([     
+  "todo",
+  "in_progress",
+  "done",
+])
 export const projectTaskSchema = z.object({
   id: z.number().int().positive(),
   title: z.string(),
-  status: z.string().optional(),
-  priority: z.string().nullable().optional(),
+  description: z.string().nullable(),
+  status: taskStatusSchema,
+  priority: z.string(),             
   dueDate: z.string().nullable(),
   createdAt: z.string(),
   assignee: taskAssigneeSchema.nullable(),
 })
-
 export const projectDetailResponseSchema = z.object({
   project: projectSchema,
   creator: creatorSchema,
@@ -70,6 +75,7 @@ export const projectDetailResponseSchema = z.object({
   stats: projectStatsSchema,
   membersPreview: z.array(memberPreviewSchema),
   tasks: z.array(projectTaskSchema),
+    currentUserRole: z.enum(["owner", "admin", "member"]),
 })
 
 export type ProjectDetailParams = z.infer<typeof projectDetailParamsSchema>

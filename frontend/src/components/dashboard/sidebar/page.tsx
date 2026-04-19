@@ -75,7 +75,7 @@ export function Sidebar({
   return (
     <aside className="sticky top-0 z-40 h-screen w-[280px] max-w-[82vw] border-r border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="flex h-full flex-col">
-        {/* Brand */}
+   
         <div className="border-b border-border/60 px-5 py-4">
           <div className="flex items-center gap-2">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 ring-1 ring-border/60">
@@ -85,7 +85,7 @@ export function Sidebar({
           </div>
         </div>
 
-        {/* Org Switcher */}
+
         <div className="relative border-b border-border/60 px-4 py-4">
           <button
             onClick={() => setOpen((p) => !p)}
@@ -127,7 +127,7 @@ export function Sidebar({
           )}
         </div>
 
-        {/* Navigation */}
+
         <div className="flex-1 overflow-y-auto px-3 py-4">
           <nav className="space-y-1">
             {mainLinks.map((link) => {
