@@ -19,11 +19,7 @@ const createTaskSchema = z.object({
     .optional()
     .nullable(),   
 
-  dueDate: z
-    .string()
-    .datetime()
-    .optional()
-    .nullable(),   
+  dueDate: z.coerce.date().optional().nullable()   
 })
 
 module.exports = { createTaskSchema }

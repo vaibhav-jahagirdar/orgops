@@ -4,7 +4,10 @@ const asyncHandler = require("../utils/asyncHandler")
 
 const createTaskController = asyncHandler(async (req, res) => {
 
-  const parsed = createTaskSchema.parse(req.body)
+const parsed = createTaskSchema.parse({
+  ...req.body,
+  dueDate: req.body.due_date,
+})
 
   const { orgId, projectId } = req.params
   const userId = req.user.id

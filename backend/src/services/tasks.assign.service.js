@@ -17,7 +17,7 @@ async function assignTask(userId, targetId, orgId, taskId) {
     }
 
     const taskRow = taskResult.rows[0];
-    if (taskRow.status === "DONE") {
+    if (taskRow.status === "done") {
       throw { code: "CANNOT_ASSIGN_COMPLETED_TASK" };
     }
     const previousAssignee = taskRow.assigned_to;

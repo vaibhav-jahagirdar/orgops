@@ -95,6 +95,7 @@ async function projectInfo({ projectId, orgId }) {
       t.status,
       t.priority,
       t.due_date,
+      t.description,
       t.created_at,
       assignee.id AS assignee_id,
       assignee.name AS assignee_name,
@@ -168,6 +169,7 @@ async function projectInfo({ projectId, orgId }) {
       tasks: tasksRes.rows.map((t) => ({
         id: t.id,
         title: t.title,
+        description: t.description,
         status: t.status,
         priority: t.priority,
         dueDate: t.due_date,

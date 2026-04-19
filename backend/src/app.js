@@ -13,7 +13,13 @@ const dashboardReadRoute = require("./routes/dashboard.read.route")
 const membersReadRoute = require("./routes/members.read.route")
 const membersWriteRoute = require("./routes/membership.route")
 const projectDetailRoute = require("./routes/project.read.route")
-
+const taskStatusRoute = require("./routes/task.status.route")
+const taskAssignRoute = require("./routes/tasks.assign.route")
+const updateRoleRoute = require("./routes/updateuserrole.route")
+const transferOwnershipRoute = require("./routes/transferownership.route")
+const commentCreateRoute = require("./routes/task.comment.create.route")
+const listCommentsRoute = require("./routes/comments.list.route")
+const authRefreshRoute = require("./routes/auth.refresh.route")
 
 const app = express();
 
@@ -34,6 +40,13 @@ app.use("/orgs", taskWriteRoutes)
 app.use("/orgs", dashboardReadRoute)
 app.use("/orgs",membersReadRoute)
 app.use("/orgs", projectDetailRoute)
+app.use("/orgs", taskStatusRoute)
+app.use("/orgs", taskAssignRoute)
+app.use("/orgs", updateRoleRoute)
+app.use("/orgs", transferOwnershipRoute)
+app.use("/orgs", commentCreateRoute)
+app.use("/orgs", listCommentsRoute)
+app.use("/auth", authRefreshRoute)
 
 app.use(errorHandler);
 

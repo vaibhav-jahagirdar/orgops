@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const requireAuth = require("../middleware/requireAuth");
-const requireMembership = require("../middleware/requireMembership");
+const {requireMembership} = require("../middleware/requireMembership");
 
 const {
   updateTaskStatusController
@@ -10,7 +10,7 @@ const {
 
 
 router.patch(
-  "/orgs/:orgId/tasks/:taskId/status",
+  "/:orgId/tasks/:taskId/status",
   requireAuth,
   requireMembership(), 
   updateTaskStatusController

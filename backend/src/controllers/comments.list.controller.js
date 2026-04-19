@@ -1,32 +1,29 @@
-const {
-  listCommentsParamsSchema,
-  listCommentsQuerySchema
-} = require("../schemas/comments.list.schema");
+const { listCommentsParamsSchema, listCommentsQuerySchema } = require("../schemas/comments.list.schema")
+const { listComments } = require("../services/comments.list.service")
 
-const { listComments } = require("../services/comments.list.service");
+async function listCommentsController(req, res) {
+    try {
+        const parsedParams = listCommentsParamsSchema.parse(req.params)
+        const parsedQuery  = listCommentsQuerySchema.parse(req.query)
 
-async function listCommentsController(req, res, next) {
-  try {
-    const parsedParams = listCommentsParamsSchema.parse(req.params);
-    const parsedQuery = listCommentsQuerySchema.parse(req.query);
+        const result = await listComments(
+            parsedParams.orgId,
+            parsedParams.taskId,
+            parsedQuery.page,
+            parsedQuery.limit
+        )
 
-    const userId = req.user.id;
-    const role = req.membership.role;
+        return res.status(200).json(result)
 
-    const result = await listComments(
-      parsedParams.orgId,
-      userId,
-      parsedParams.taskId,
-      role,
-      parsedQuery.page,
-      parsedQuery.limit
-    );
-
-    return res.status(200).json(result);
-
-  } catch (err) {
-    next(err);
-  }
+    } catch (err) {
+        if (err.name === "ZodError") {
+            return res.status(400).json({ error: err.errors })
+        }
+        if (err.code) {
+            return res.status(400).json({ error: err.code })
+        }
+        return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" })
+    }
 }
 
-module.exports = { listCommentsController };
+module.exports = { listCommentsController }

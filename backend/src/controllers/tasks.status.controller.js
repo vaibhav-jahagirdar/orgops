@@ -1,5 +1,5 @@
-const { updateStatus } = require("../services/tasks/tasks.status.service");
-const { updateTaskStatusSchema } = require("../schemas/task.updateStatus.schema");
+const { updateStatus } = require("../services/tasks.status.service");
+const { updateTaskStatusSchema } = require("../schemas/task.updatestatus.schema")
 
 async function updateTaskStatusController(req, res, next) {
   try {

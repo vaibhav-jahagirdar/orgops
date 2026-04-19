@@ -64,29 +64,30 @@ async function createTask({
       ]
     )
 
-    await client.query(
-      `INSERT INTO audit_logs
-       (actor_user_id, org_id, action, entity_type, entity_id)
-       VALUES ($1,$2,$3,$4,$5)`,
-      [userId, orgId, "TASK_CREATED", "task", taskResult.rows[0].id]
-    )
+   await client.query(
+  `INSERT INTO audit_logs
+   (actor_user_id, action, entity_type, entity_id)
+   VALUES ($1,$2,$3,$4)`,
+  [userId, "TASK_CREATED", "task", taskResult.rows[0].id]
+)
 
     await client.query("COMMIT")
 
     return taskResult.rows[0]
 
   } catch (err) {
-    await client.query("ROLLBACK")
+  await client.query("ROLLBACK")
 
-    if (err instanceof AppError) throw err
+  console.error("FULL ERROR:", err)
 
-    throw new AppError(
-      "Failed to create task",
-      500,
-      "TASK_CREATION_FAILED"
-    )
+  if (err instanceof AppError) throw err
 
-  } finally {
+  throw new AppError(
+    err.message, 
+    500,
+    "TASK_CREATION_FAILED"
+  )
+} finally {
     client.release()
   }
 }

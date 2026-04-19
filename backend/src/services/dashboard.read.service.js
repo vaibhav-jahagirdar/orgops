@@ -126,7 +126,7 @@ async function getDashboardData({ orgId, userId }) {
         [orgId]
       ),
 
-      // ✅ FIXED risky query
+      
       pool.query(
         `SELECT COUNT(*) FROM projects p
          WHERE p.org_id = $1
@@ -139,7 +139,6 @@ async function getDashboardData({ orgId, userId }) {
         [orgId]
       ),
 
-      // ✅ FIXED updated_at → created_at
       pool.query(
         `SELECT id, title, created_at
          FROM tasks

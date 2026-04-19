@@ -9,12 +9,12 @@ async function getProjectDetailController(req, res, next) {
 
     const result = await projectInfo({ projectId, orgId })
 
-    return res.status(200).json(result)
+    return res.status(200).json({...result, currentUserRole})
   } catch (err) {
     if (err.statusCode) {
       return res.status(err.statusCode).json({
         error: err.message,
-        currentUserRole
+        
       })
     }
     return next(err)
