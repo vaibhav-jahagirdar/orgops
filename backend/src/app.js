@@ -20,6 +20,7 @@ const transferOwnershipRoute = require("./routes/transferownership.route")
 const commentCreateRoute = require("./routes/task.comment.create.route")
 const listCommentsRoute = require("./routes/comments.list.route")
 const authRefreshRoute = require("./routes/auth.refresh.route")
+const logoutRoute = require("./routes/auth.routes")
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/orgs", transferOwnershipRoute)
 app.use("/orgs", commentCreateRoute)
 app.use("/orgs", listCommentsRoute)
 app.use("/auth", authRefreshRoute)
+app.use("/auth", logoutRoute)
 
 app.use(errorHandler);
 
