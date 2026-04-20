@@ -36,201 +36,200 @@ export function Maincontent({
   dashboardData: DashboardData
 }) {
   const isAdmin = ["owner", "admin"].includes(currentOrg.role)
-  const { kpis, myTasks, deadlines, projects, activity, insights } = dashboardData
+  const { kpis, myTasks, deadlines, projects, insights } = dashboardData
+  const allTasks = [...myTasks.overdue, ...myTasks.today, ...myTasks.upcoming]
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
-      {/* KPI CARDS */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
-        <Card title="Projects" value={kpis.activeProjects} icon={Folder} />
-        <Card title="Due Today" value={kpis.dueToday} icon={CheckSquare} />
-        <Card title="Overdue" value={kpis.overdue} icon={AlertTriangle} highlight />
-        {isAdmin && <Card title="Members" value={kpis.members} icon={Users} />}
+    <div className="mx-auto max-w-[1200px] space-y-4 p-6">
+
+      {/* ── KPI Strip ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-px bg-zinc-900 border border-zinc-900 rounded-sm overflow-hidden sm:grid-cols-4">
+        <KpiCard label="Projects"  value={kpis.activeProjects} icon={Folder}        />
+        <KpiCard label="Due Today" value={kpis.dueToday}       icon={CheckSquare}   />
+        <KpiCard label="Overdue"   value={kpis.overdue}        icon={AlertTriangle} danger />
+        {isAdmin && <KpiCard label="Members" value={kpis.members} icon={Users} />}
       </div>
 
-      {/* MAIN GRID */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className={isAdmin ? "lg:col-span-7" : "lg:col-span-8"}>
-          <Section
+      {/* ── Main Grid ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+
+        {/* Left — 2/3 */}
+        <div className="lg:col-span-2 space-y-4">
+          <Panel
             title="Your Work"
             action={
               <Link
                 href={`/dashboard/${currentOrg.id}/tasks/create`}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-500 transition hover:border-zinc-700 hover:text-zinc-300"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Task
+                New task
               </Link>
             }
           >
-            {[...myTasks.overdue, ...myTasks.today, ...myTasks.upcoming].length === 0 && (
-              <Empty text="No tasks assigned" />
-            )}
-
+            {allTasks.length === 0 && <Empty text="No tasks assigned to you" />}
             {myTasks.overdue.map((t) => (
-              <Row key={t.id} title={t.title} sub={t.project} right="Overdue" danger />
+              <Row key={t.id} title={t.title} sub={t.project} badge="Overdue" danger />
             ))}
-
             {myTasks.today.map((t) => (
-              <Row key={t.id} title={t.title} sub={t.project} right="Today" />
+              <Row key={t.id} title={t.title} sub={t.project} badge="Today" />
             ))}
-
             {myTasks.upcoming.map((t) => (
-              <Row key={t.id} title={t.title} sub={t.project} right={t.due_date} />
+              <Row key={t.id} title={t.title} sub={t.project} badge={t.due_date} />
             ))}
-          </Section>
-        </div>
-
-        <div className={`${isAdmin ? "lg:col-span-5" : "lg:col-span-4"} space-y-6`}>
-          <Section title="Deadlines">
-            {deadlines.length === 0 && <Empty text="No upcoming deadlines" />}
-
-            {deadlines.map((d) => (
-              <Row key={d.id} title={d.title} sub={d.project} right={d.due_date} />
-            ))}
-          </Section>
+          </Panel>
 
           {isAdmin && (
-            <Section title="Insights">
-              <p className="text-sm text-zinc-700 dark:text-zinc-300">
-                <span className="mr-1 text-amber-500">⚠</span>
-                {insights.unassignedTasks} unassigned tasks
-              </p>
-              <p className="text-sm text-zinc-700 dark:text-zinc-300">
-                <span className="mr-1 text-amber-500">⚠</span>
-                {insights.riskyProjects} risky projects
-              </p>
-              <p className="text-sm text-zinc-700 dark:text-zinc-300">
-                <span className="mr-1 text-amber-500">⚠</span>
-                {insights.overloadedUsers.length} overloaded users
-              </p>
-            </Section>
-          )}
-        </div>
-
-        {isAdmin && (
-          <div className="lg:col-span-6">
-            <Section
+            <Panel
               title="Project Health"
               action={
                 <Link
                   href={`/dashboard/${currentOrg.id}/projects/create`}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                  className="inline-flex items-center gap-1.5 rounded-sm border border-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-500 transition hover:border-zinc-700 hover:text-zinc-300"
                 >
                   <Plus className="h-3.5 w-3.5" />
-                  Project
+                  New project
                 </Link>
               }
             >
               {projects.length === 0 && <Empty text="No projects yet" />}
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {projects.map((p) => (
+                  <ProjectRow
+                    key={p.id}
+                    name={p.name}
+                    progress={p.progress}
+                    overdueTasks={p.overdueTasks}
+                  />
+                ))}
+              </div>
+            </Panel>
+          )}
+        </div>
 
-              {projects.map((p) => (
-                <div key={p.id} className="space-y-1.5 rounded-lg border border-zinc-200/80 bg-zinc-50/60 p-3 dark:border-zinc-800 dark:bg-zinc-900/40">
-                  <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                    {p.name}
-                  </p>
-                  <div className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
-                    <div
-                      className="h-2 rounded-full bg-zinc-900 dark:bg-zinc-100"
-                      style={{ width: `${p.progress}%` }}
-                    />
-                  </div>
-                  {p.overdueTasks > 0 && (
-                    <p className="text-xs font-medium text-rose-600 dark:text-rose-400">
-                      {p.overdueTasks} overdue
-                    </p>
-                  )}
-                </div>
-              ))}
-            </Section>
-          </div>
-        )}
-
-        <div className={isAdmin ? "lg:col-span-6" : "lg:col-span-12"}>
-          <Section title="Activity">
-            {activity.length === 0 && <Empty text="No recent activity" />}
-
-            {activity.map((a) => (
-              <p
-                key={a.id}
-                className="rounded-md border border-zinc-200/70 px-3 py-2 text-sm text-zinc-700 dark:border-zinc-800 dark:text-zinc-300"
-              >
-                {a.message}
-              </p>
+        {/* Right — 1/3 */}
+        <div className="space-y-4">
+          <Panel title="Deadlines">
+            {deadlines.length === 0 && <Empty text="No upcoming deadlines" />}
+            {deadlines.map((d) => (
+              <Row key={d.id} title={d.title} sub={d.project} badge={d.due_date} />
             ))}
-          </Section>
+          </Panel>
+
+          {isAdmin && (
+            <Panel title="Insights">
+              <InsightRow label="Unassigned tasks"  value={insights.unassignedTasks}       />
+              <InsightRow label="Risky projects"    value={insights.riskyProjects}          />
+              <InsightRow label="Overloaded users"  value={insights.overloadedUsers.length} />
+            </Panel>
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-function Card({ title, value, icon: Icon, highlight }: any) {
+function KpiCard({
+  label, value, icon: Icon, danger,
+}: {
+  label: string; value: number; icon: any; danger?: boolean
+}) {
   return (
-    <div
-      className={`rounded-xl border bg-white p-4 shadow-sm dark:bg-zinc-950 ${
-        highlight
-          ? "border-rose-200 dark:border-rose-900/60"
-          : "border-zinc-200 dark:border-zinc-800"
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          {title}
-        </p>
-        <Icon
-          className={`h-4 w-4 ${
-            highlight ? "text-rose-500" : "text-zinc-500 dark:text-zinc-400"
-          }`}
-        />
-      </div>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+    <div className="relative bg-zinc-950 px-5 py-5">
+      <p className="font-mono text-[10px] tracking-widest uppercase text-zinc-600 mb-3">
+        {label}
+      </p>
+      <p className={`font-mono text-4xl font-medium leading-none tracking-tight tabular-nums ${
+        danger ? "text-rose-500" : "text-zinc-100"
+      }`}>
         {value}
       </p>
+      <Icon className="absolute top-5 right-5 h-4 w-4 text-zinc-800" />
     </div>
   )
 }
 
-function Section({ title, children, action }: any) {
+function Panel({
+  title, children, action,
+}: {
+  title: string; children: React.ReactNode; action?: React.ReactNode
+}) {
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+    <section className="rounded-sm border border-zinc-900 bg-zinc-950 overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-900">
+        <h2 className="font-mono text-[10px] tracking-widest uppercase text-zinc-500">
           {title}
         </h2>
         {action}
       </div>
-      <div className="space-y-2">{children}</div>
+      <div className="p-2 space-y-px">
+        {children}
+      </div>
     </section>
   )
 }
 
-function Row({ title, sub, right, danger }: any) {
+function Row({
+  title, sub, badge, danger,
+}: {
+  title: string; sub: string; badge: string; danger?: boolean
+}) {
   return (
-    <div className="flex items-start justify-between rounded-lg border border-transparent px-2 py-2 transition hover:border-zinc-200 hover:bg-zinc-50 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/50">
+    <div className={`group flex items-center justify-between rounded-sm px-3 py-2.5 border-l-2 transition-colors cursor-pointer ${
+      danger
+        ? "border-l-rose-900 hover:border-l-rose-500 hover:bg-rose-950/20"
+        : "border-l-transparent hover:border-l-zinc-700 hover:bg-zinc-900/40"
+    }`}>
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
+        <p className="truncate text-[13px] font-medium text-zinc-300 group-hover:text-zinc-100 transition-colors">
           {title}
         </p>
-        <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{sub}</p>
+        <p className="truncate text-xs text-zinc-600 mt-0.5">{sub}</p>
       </div>
-      <span
-        className={`ml-3 shrink-0 text-xs font-medium ${
-          danger
-            ? "text-rose-600 dark:text-rose-400"
-            : "text-zinc-500 dark:text-zinc-400"
-        }`}
-      >
-        {right}
+      <span className={`ml-4 shrink-0 font-mono text-[11px] font-medium ${
+        danger ? "text-rose-500" : "text-zinc-600"
+      }`}>
+        {badge}
       </span>
+    </div>
+  )
+}
+
+function InsightRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center gap-3 rounded-sm px-3 py-2.5 transition hover:bg-zinc-900/40">
+      <span className="h-1.5 w-1.5 rounded-full bg-amber-500/70 flex-shrink-0" />
+      <span className="text-[13px] text-zinc-500 flex-1">{label}</span>
+      <span className="font-mono text-xs font-medium text-zinc-300">{value}</span>
+    </div>
+  )
+}
+
+function ProjectRow({
+  name, progress, overdueTasks,
+}: {
+  name: string; progress: number; overdueTasks: number
+}) {
+  return (
+    <div className="rounded-sm border border-zinc-900 bg-zinc-900/20 px-3 py-3 transition hover:border-zinc-800">
+      <div className="flex items-center justify-between mb-2.5">
+        <p className="text-[13px] font-medium text-zinc-300 truncate mr-3">{name}</p>
+        <span className="font-mono text-[11px] text-zinc-600 shrink-0">{progress}%</span>
+      </div>
+      <div className="h-px bg-zinc-800 rounded-full overflow-hidden">
+        <div className="h-px bg-zinc-500 rounded-full" style={{ width: `${progress}%` }} />
+      </div>
+      {overdueTasks > 0 && (
+        <p className="mt-2 font-mono text-[11px] font-medium text-rose-500">{overdueTasks} overdue</p>
+      )}
     </div>
   )
 }
 
 function Empty({ text }: { text: string }) {
   return (
-    <p className="rounded-lg border border-dashed border-zinc-300 px-3 py-3 text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-      {text}
-    </p>
+    <div className="flex items-center justify-center rounded-sm border border-dashed border-zinc-900 mx-1 py-8">
+      <p className="text-xs text-zinc-700">{text}</p>
+    </div>
   )
 }

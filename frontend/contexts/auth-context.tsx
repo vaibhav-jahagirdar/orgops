@@ -20,13 +20,13 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const {data: user, isLoading, isError} = useMe()
+    const { data: user, isLoading, error } = useMe()
     return (
         <AuthContext.Provider value={{
             user: user ?? null,
             userId : user?.id ?? null,
             isLoading,
-            isError
+            isError: !!error
         }}>
             {children}
         </AuthContext.Provider>

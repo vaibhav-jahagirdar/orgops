@@ -13,9 +13,7 @@ export default async function OrgPage({
   const { orgId } = await params
 
   const cookieStore = await cookies()
-  const cookieHeader = {
-    cookie: cookieStore.toString()
-  }
+  const cookieHeader = { cookie: cookieStore.toString() }
 
   const [orgRes, orgsRes, userRes, dashboardRes] = await Promise.all([
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/orgs/${orgId}`, {
@@ -36,41 +34,39 @@ export default async function OrgPage({
     })
   ])
 
-
   if (orgRes.status === 401 || orgsRes.status === 401) {
     redirect("/login")
   }
 
-  if (orgRes.status === 403) {
-    redirect("/dashboard")
+
+  const orgsJson = await orgsRes.json()
+const orgs = (orgsJson?.orgs ?? []).map((o: { id: string; name: string; role: string }) => ({
+  ...o,
+  id: Number(o.id)
+}))
+  const fallbackOrg = orgs.find((o :  any) => o.id !== orgId)
+
+  function redirectToFallback(): never {
+    if (fallbackOrg) redirect(`/dashboard/${fallbackOrg.id}`)
+    redirect("/create-org")
   }
 
-  if (!orgRes.ok) {
-    redirect("/dashboard")
+  if (orgRes.status === 403 || !orgRes.ok) {
+    redirectToFallback()
   }
 
   if (!dashboardRes.ok) {
     console.error("Dashboard API failed:", dashboardRes.status)
-
   }
 
-  const [orgJson, orgsJson, userJson, dashboardJson] = await Promise.all([
+  const [orgJson, userJson, dashboardJson] = await Promise.all([
     orgRes.json(),
-    orgsRes.json(),
     userRes.json(),
     dashboardRes.json()
   ])
 
-  console.log("ORG RAW:", orgJson)
-  console.log("ORGS RAW:", orgsJson)
-  console.log("USER RAW:", userJson)
-  console.log("DASHBOARD RAW:", dashboardJson)
-
-  
   const org = orgJson?.org
-  const orgs = orgsJson?.orgs
   const user = userJson
-
   const dashboardData = dashboardJson?.data ?? dashboardJson
 
   if (!dashboardData || !dashboardData.kpis) {
@@ -79,20 +75,20 @@ export default async function OrgPage({
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar currentOrg={org} orgs={orgs} />
+  <div className="flex min-h-screen bg-zinc-950">
+    <Sidebar currentOrg={org} orgs={orgs} />
 
-      <div className="flex-1 flex flex-col">
-        <Topbar currentOrg={org} userInfo={user} />
+    <div className="flex-1 flex flex-col min-w-0">
+      <Topbar currentOrg={org} userInfo={user} />
 
-        <main className="flex-1 p-6">
-          <Maincontent
-            currentOrg={org}
-            userInfo={user}
-            dashboardData={dashboardData}
-          />
-        </main>
-      </div>
+      <main className="flex-1 overflow-y-auto">
+        <Maincontent
+          currentOrg={org}
+          userInfo={user}
+          dashboardData={dashboardData}
+        />
+      </main>
     </div>
-  )
+  </div>
+)
 }
