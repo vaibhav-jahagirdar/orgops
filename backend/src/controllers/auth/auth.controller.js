@@ -8,9 +8,9 @@ const REFRESH_TOKEN_COOKIE_MS = REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000;
 
 const cookieBaseOptions = {
   httpOnly: true,
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production",
-};
+  sameSite: "none",
+  secure: true,
+};;
 
 const register = asyncHandler(async (req, res) => {
   const parsed = registerSchema.parse(req.body);

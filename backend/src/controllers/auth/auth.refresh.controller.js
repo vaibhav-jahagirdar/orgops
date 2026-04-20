@@ -12,25 +12,20 @@ async function refreshSessionController(req, res, next) {
 
     const { accessToken, refreshToken: newRefreshToken } = await refreshSession(refreshToken);
 
-    res.cookie("refreshToken", newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
-    });
-
-    res.cookie("accessToken", accessToken, {
+   const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict", 
-  maxAge: 15 * 60 * 1000,
-});
+  secure: true,
+  sameSite: "none",
+};
 
 res.cookie("refreshToken", newRefreshToken, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
+  ...cookieOptions,
   maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
+res.cookie("accessToken", accessToken, {
+  ...cookieOptions,
+  maxAge: 15 * 60 * 1000,
 });
 
 return res.status(200).json({
